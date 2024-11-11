@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f7f7f7;
+            color: #333;
+            flex-direction: column;
+        }
+        .container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 4px solid #ccc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: border-color 1s linear;
+        }
+        #timer {
+            font-size: 48px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            z-index: 2;
+        }
+        .progress {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            clip-path: inset(0 50% 0 0); /* Pour créer une demi-cercle */
+            background-color: #5cb85c;
+            transform-origin: center;
+            transform: rotate(0deg);
+            transition: transform 1s linear;
+            z-index: 1;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #5cb85c;
+            color: white;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="timerContainer">
+    <div class="progress" id="progress"></div>
+    <div id="timer">25:00</div>
+</div>
+<div>
+    <button id="startButton">Démarrer</button>
+    <button id="stopButton" disabled>Arrêter</button>
+    <div id="message"></div>
+</div>
+
+<script>
+    let timer;
+    let remainingTime = 25 * 60; // 25 minutes en secondes
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        document.getElementById('timer').textContent = 
+            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        // Calculer la taille de la div en fonction du temps restant
+        const totalDuration = 25 * 60; // Durée totale en secondes
+        const scale = remainingTime / totalDuration;
+        document.getElementById('timerContainer').style.transform = `scale(${scale})`;
+
+        // Modifier la rotation de la barre de progression
+        const rotation = (1 - scale) * 360; // 360 degrés pour un tour complet
+        document.getElementById('progress').style.transform = `rotate(${rotation}deg)`;
+        
+        // Modifier la couleur de la bordure en fonction du temps restant
+        const progressPercentage = (remainingTime / totalDuration);
+        const borderColor = `rgb(${255 * (1 - progressPercentage)}, ${255 * progressPercentage}, 0)`;
+        document.getElementById('timerContainer').style.borderColor = borderColor;
+    }
+
+    function startTimer() {
+        document.getElementById('startButton').disabled = true;
+        document.getElementById('stopButton').disabled = false;
+
+        timer = setInterval(() => {
+            remainingTime--;
+            updateTimerDisplay();
+            if (remainingTime <= 0) {
+                clearInterval(timer);
+                document.getElementById('message').textContent = "Temps écoulé ! Prenez une pause.";
+                document.getElementById('startButton').disabled = false;
+                document.getElementById('stopButton').disabled = true;
+                remainingTime = 25 * 60; // Réinitialiser le temps
+                updateTimerDisplay(); // Réinitialiser l'affichage
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timer);
+        document.getElementById('startButton').disabled = false;
+        document.getElementById('stopButton').disabled = true;
+        remainingTime = 25 * 60; // Réinitialiser le temps
+        updateTimerDisplay();
+        document.getElementById('message').textContent = "";
+    }
+
+    document.getElementById('startButton').addEventListener('click', startTimer);
+    document.getElementById('stopButton').addEventListener('click', stopTimer);
+
+    updateTimerDisplay(); // Afficher le temps initial
+</script>
+
+</body>
+</html>
